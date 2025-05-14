@@ -15,7 +15,7 @@ def f(x: np.ndarray, y: np.ndarray):
 
 
 def schedule(
-    current_iter: int, total_iter: int, schedule_type: Literal["cos", "linear", "mul"]
+    current_iter: int, total_iter: int, schedule_type: Literal["cos", "linear"]
 ) -> float:
     omega_max, omega_min = 0.9, 0.4
     if schedule_type == "linear":

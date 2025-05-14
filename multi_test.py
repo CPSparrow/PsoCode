@@ -4,11 +4,11 @@ from tqdm import tqdm
 from pso import PsoModel, f
 
 
-def mulit_test(
+def multi_test(
     n_worker: int, n_iter: int, n_test: int, schedule_type=None, init_type=None
 ) -> np.ndarray:
     gb_list = []
-    for i in tqdm(range(n_test), ncols=80):
+    for _ in tqdm(range(n_test), ncols=80):
         model = PsoModel(n_worker, n_iter, v_init=init_type)
         _, gb = model.train(schedule_type)
         gb_list.append(f(gb[0], gb[1]))
@@ -18,7 +18,7 @@ def mulit_test(
 if __name__ == "__main__":
     n_test = 200
     np.random.seed(42)
-    result_list = mulit_test(
+    result_list = multi_test(
         n_worker=50, n_iter=500, n_test=n_test, schedule_type="cos", init_type=None
     )
 
