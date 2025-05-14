@@ -1,5 +1,5 @@
-from typing import Literal
 from time import time
+from typing import Literal
 
 import numpy as np
 
@@ -97,6 +97,6 @@ if __name__ == "__main__":
     model = PsoModel(50, 500)
     history, gb = model.train(schedule_type="cos")
     print(f"X:{gb[0]:.9f}, Y:{gb[1]:.9f}")
-    print(f"score:{f(gb[0],gb[1]):.3f}")
+    print(f"score:{f(gb[0],gb[1]):.8f}")
 
     print(f"time cost:{time()-a:.3f}")
