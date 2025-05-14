@@ -1,5 +1,5 @@
-from time import time
 from typing import Literal
+from time import time
 
 import numpy as np
 
@@ -15,9 +15,9 @@ def f(x: np.ndarray, y: np.ndarray):
 
 
 def schedule(
-    current_iter: int, total_iter: int, schedule_type: Literal["cos", "linear", "mul"]
+    current_iter: int, total_iter: int, schedule_type: Literal["cos", "linear","mul"]
 ) -> float:
-    omega_max, omega_min = 0.9, 1e-3
+    omega_max, omega_min = 0.9, 0.4
     if schedule_type == "linear":
         return omega_max - (omega_max - omega_min) * current_iter / total_iter
     elif schedule_type == "cos":
@@ -29,21 +29,12 @@ def schedule(
 
 
 class PsoModel:
-    def __init__(self, n_worker: int, n_iter, v_init=None):
+    def __init__(self, n_worker, n_iter):
         self.n_worker = n_worker
         self.n_iter = n_iter
 
         self.x_list = np.random.random((n_worker, 2)) * 10
-        if v_init is None:
-            self.v_list = np.random.normal(loc=0, scale=1, size=(n_worker, 2))
-        elif isinstance(v_init, float):
-            self.v_list = np.random.normal(loc=0, scale=v_init, size=(n_worker, 2))
-        elif v_init == "uniform":
-            self.v_list = np.random.uniform(low=-1, high=1, size=(n_worker, 2))
-        elif v_init == "zero":
-            self.v_list = np.zeros((n_worker, 2))
-        else:
-            raise NotImplementedError(f"v type {v_init} not implemented")
+        self.v_list = np.random.normal(loc=1, scale=1, size=(n_worker, 2))
 
         self.personal_best_list = self.x_list
         self.personal_score_list = f(self.x_list[:, 0], self.x_list[:, 1])
@@ -85,18 +76,18 @@ class PsoModel:
     def train(self, schedule_type=None):
         for i in range(self.n_iter):
             if schedule_type is not None:
-                self.forward(schedule(i, self.n_iter, schedule_type))
+                self.forward(schedule(i,self.n_iter,schedule_type))
             else:
                 self.forward()
         return self.gb_history, self.global_best
 
 
 if __name__ == "__main__":
-    a = time()
-
+    a=time()
+    
     model = PsoModel(50, 500)
     history, gb = model.train(schedule_type="cos")
     print(f"X:{gb[0]:.9f}, Y:{gb[1]:.9f}")
-    print(f"score:{f(gb[0],gb[1]):.8f}")
+    print(f"score:{f(gb[0],gb[1]):.3f}")
 
     print(f"time cost:{time()-a:.3f}")
