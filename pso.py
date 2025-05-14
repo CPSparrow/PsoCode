@@ -1,6 +1,8 @@
+from typing import Literal
+from time import time
+
 import numpy as np
-from tqdm import tqdm
-from matplotlib import pyplot as plt
+
 
 def f(x: np.ndarray, y: np.ndarray):
     return (
@@ -12,13 +14,27 @@ def f(x: np.ndarray, y: np.ndarray):
     )
 
 
+def schedule(
+    current_iter: int, total_iter: int, schedule_type: Literal["cos", "linear","mul"]
+) -> float:
+    omega_max, omega_min = 0.9, 0.4
+    if schedule_type == "linear":
+        return omega_max - (omega_max - omega_min) * current_iter / total_iter
+    elif schedule_type == "cos":
+        return omega_min + 0.5 * (omega_max - omega_min) * (
+            1 + np.cos(np.pi * current_iter / total_iter)
+        )
+    else:
+        raise NotImplementedError(f"schedule_type {schedule_type} not implemented")
+
+
 class PsoModel:
     def __init__(self, n_worker, n_iter):
         self.n_worker = n_worker
         self.n_iter = n_iter
 
         self.x_list = np.random.random((n_worker, 2)) * 10
-        self.v_list = np.random.normal(loc=0, scale=1, size=(n_worker, 2))
+        self.v_list = np.random.normal(loc=1, scale=1, size=(n_worker, 2))
 
         self.personal_best_list = self.x_list
         self.personal_score_list = f(self.x_list[:, 0], self.x_list[:, 1])
@@ -57,22 +73,21 @@ class PsoModel:
             * (self.global_best - self.x_list)
         )
 
-    def train(self):
-        for i in tqdm(range(self.n_iter), ncols=80, desc="Training:"):
-            self.forward()
+    def train(self, schedule_type=None):
+        for i in range(self.n_iter):
+            if schedule_type is not None:
+                self.forward(schedule(i,self.n_iter,schedule_type))
+            else:
+                self.forward()
         return self.gb_history, self.global_best
 
 
 if __name__ == "__main__":
+    a=time()
+    
     model = PsoModel(50, 500)
-    history, gb = model.train()
+    history, gb = model.train(schedule_type="cos")
     print(f"X:{gb[0]:.9f}, Y:{gb[1]:.9f}")
     print(f"score:{f(gb[0],gb[1]):.3f}")
 
-    plt.figure(dpi=160)
-    plt.plot(history)
-    plt.title("PSO train log")
-    plt.xlabel("iteration")
-    plt.ylabel("score")
-    plt.legend()
-    plt.show()
+    print(f"time cost:{time()-a:.3f}")

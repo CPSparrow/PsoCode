@@ -2,3 +2,4 @@ test*.py
 test*.ipynb
 .vscode
 __pycache__
+*.svg
